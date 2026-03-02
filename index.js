@@ -18,14 +18,11 @@ let nextId = 2;
 
 // GET - получить все задачи
 app.get('/api/todos', async (req, res) => {
-  await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 260)); // latency
-
   res.json(todos);
 });
 
 // POST - создать задачу
 app.post('/api/todos', async (req, res) => {
-  await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 260)); // latency
   const { text } = req.body;
 
   if (!text || text.trim() === '') {
@@ -44,8 +41,6 @@ app.post('/api/todos', async (req, res) => {
 
 // PATCH - обновить задачу (частично)
 app.patch('/api/todos/:id', async (req, res) => {
-  await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 260)); // latency
-
   const id = parseInt(req.params.id);
   const { text, isDone } = req.body;
 
@@ -73,8 +68,6 @@ app.patch('/api/todos/:id', async (req, res) => {
 
 // DELETE - удалить одну задачу
 app.delete('/api/todos/:id', async (req, res) => {
-  await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 260)); // latency
-
   const id = parseInt(req.params.id);
   const index = todos.findIndex(t => t.id === id);
 
@@ -88,8 +81,6 @@ app.delete('/api/todos/:id', async (req, res) => {
 
 // DELETE - удалить все задачи
 app.delete('/api/todos', async (req, res) => {
-  await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 260)); // latency
-
   const count = todos.length;
   todos = [];
   res.json({ message: 'All todos deleted', count });
