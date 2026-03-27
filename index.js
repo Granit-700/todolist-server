@@ -1,91 +1,99 @@
 import express from 'express';
 import cors from 'cors';
+import mongoose from 'mongoose';
+
+const PORT = process.env.PORT || 3000;
+const URI = process.env.DB_URI;
 
 const app = express();
-const PORT = process.env.PORT || 3001;
-
 app.use(cors());
 app.use(express.json());
 
-let todos = [
-  {
-    id: 1,
-    text: "server",
-    isDone: true
-  },
-];
-let nextId = 2;
+async function main() {
+  try {
+    await mongoose.connect(URI);
+    app.listen(PORT, () => {
+      console.log(`Сервер запущен на http://localhost:${PORT}`);
+    });
+  } catch (e) {
+    console.error(e.message || e);
+  };
+};
 
-// GET - получить все задачи
+const todoSchema = new mongoose.Schema({
+  text: String,
+  isDone: Boolean,
+});
+
+const Todo = mongoose.model("Todo", todoSchema);
+
 app.get('/api/todos', async (req, res) => {
+  const todos = await Todo.find();
+
   res.json(todos);
 });
 
-// POST - создать задачу
 app.post('/api/todos', async (req, res) => {
   const { text } = req.body;
 
   if (!text || text.trim() === '') {
     return res.status(400).json({ error: 'Text is required' });
-  }
-
-  const newTodo = {
-    id: nextId++,
-    text: text.trim(),
-    isDone: false
   };
 
-  todos.push(newTodo);
-  res.status(201).json(newTodo);
+  const newTodo = {
+    text: text.trim(),
+    isDone: false,
+  };
+
+  const createdTodo = await Todo.create(newTodo);
+
+  res.status(201).json(createdTodo);
 });
 
-// PATCH - обновить задачу (частично)
 app.patch('/api/todos/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = req.params.id;
   const { text, isDone } = req.body;
 
-  const todo = todos.find(t => t.id === id);
-
-  if (!todo) {
-    return res.status(404).json({ error: 'Todo not found' });
-  }
-
-  // Обновляем только переданные поля
   if (text !== undefined) {
-    const trimmedText = text.trim();
-    if (!trimmedText) {
-      return res.status(400).json({ error: 'Text cannot be empty' });
-    }
-    todo.text = trimmedText;
-  }
+    if (!text.trim()) {
+      return res.status(400).json({ error: "Text cannot be empty" });
+    };
+  };
 
-  if (isDone !== undefined) {
-    todo.isDone = isDone;
-  }
+  const updates = {};
+  if (text !== undefined) updates.text = text.trim();
+  if (isDone !== undefined) updates.isDone = isDone;
 
-  res.json(todo);
+  const updated = await Todo.findByIdAndUpdate(id, {
+    $set: updates
+  }, { new: true });
+
+  if (!updated) {
+    return res.status(404).json({ error: "Todo not found" });
+  };
+
+  res.json(updated);
 });
 
-// DELETE - удалить одну задачу
 app.delete('/api/todos/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = todos.findIndex(t => t.id === id);
+  const id = req.params.id;
 
-  if (index === -1) {
-    return res.status(404).json({ error: 'Todo not found' });
-  }
+  const deleted = await Todo.findByIdAndDelete(id);
 
-  const deleted = todos.splice(index, 1)[0];
+  if (!deleted) {
+    return res.status(404).json({ error: "Todo not found" });
+  };
+
   res.json(deleted);
 });
 
-// DELETE - удалить все задачи
 app.delete('/api/todos', async (req, res) => {
-  const count = todos.length;
-  todos = [];
-  res.json({ message: 'All todos deleted', count });
+  const result = await Todo.deleteMany();
+
+  res.json({
+    message: 'All todos deleted',
+    count: result.deletedCount,
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Сервер запущен на http://localhost:${PORT}`);
-});
+main();
