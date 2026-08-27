@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 import {
   createdTodo,
   deleteTodo,
@@ -7,7 +7,7 @@ import {
   updateTodo,
 } from "../controllers/todos";
 
-const router = express.Router();
+const router = Router();
 
 router.get("/", getTodos);
 
