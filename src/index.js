@@ -1,11 +1,13 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
+import { Todo } from "./models/Todo";
 
 const PORT = process.env.PORT || 3000;
 const URI = process.env.DB_URI;
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -19,13 +21,6 @@ async function main() {
     console.error(e.message || e);
   }
 }
-
-const todoSchema = new mongoose.Schema({
-  text: String,
-  isDone: Boolean,
-});
-
-const Todo = mongoose.model("Todo", todoSchema);
 
 app.get("/api/todos", async (req, res) => {
   const todos = await Todo.find();
