@@ -5,18 +5,25 @@
   "main": "index.js",
   "scripts": {
     "start": "node --env-file=.env index.js",
-    "dev": "nodemon --env-file=.env index.js"
+    "dev": "nodemon --env-file=.env index.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@eslint/js": "^10.0.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "globals": "^17.11.0",
     "mongoose": "^9.3.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.9.6"
   }
 }
